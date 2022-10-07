@@ -5,11 +5,11 @@ from bs4 import BeautifulSoup
 import datetime, time
 
 
-# weeks = [i for i in range(1,53)]
-# years = [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026] 
+weeks = [i for i in range(1,53)]
+years = [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026] 
 
-weeks = [i for i in range(35, 38)]
-years = [2021,2022]
+# weeks = [i for i in range(35, 38)]
+# years = [2021,2022]
 
 
 
@@ -216,7 +216,7 @@ def main():
         exit()
     while True:
         scrape_and_save()
-        time.sleep(3600)           # 18000 secoonds = five hours 
+        time.sleep(1000)           # 18000 secoonds = five hours 
 
 
 if __name__ == '__main__' :

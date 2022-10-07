@@ -54,7 +54,7 @@ class CalendarModel:
         else :
             return -1
 
-    def search(self, source_name, currency_name, impact, from_timestamp, to_timestamp):
+    def search_by_info(self, source_name, currency_name, impact, from_timestamp, to_timestamp):
         if self.connection_flag :
             query={ "source_name" : source_name if source_name.lower() != 'all' else p,
                     "currency_name" : currency_name if currency_name.lower() != 'all' else p,
@@ -64,7 +64,17 @@ class CalendarModel:
                     { 'timestamp': {'$lte' : to_timestamp}}
                     ]
                 }
-            res = self.collection.find(query,{'_id':0})
+            res = self.collection.find(query, {'_id':0})
+            return res
+        else :
+            return -1
+
+    def search_by_week_and_year(self, year, week):
+        if self.connection_flag :
+            query = { "year" : year if year.lower() != 'any' else p,
+                      "week" : week if week.lower() != 'any' else p
+                    }
+            res = self.collection.find(query, {'_id':0})
             return res
         else :
             return -1

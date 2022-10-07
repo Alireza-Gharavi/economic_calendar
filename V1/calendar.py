@@ -1,4 +1,5 @@
 import datetime
+import re
 from V1.response import ResponseAPI
 from V1.calendarModel import CalendarModel
 from flask import request, current_app
@@ -21,7 +22,7 @@ class calnedar(Resource):
         'impact':{'description':'low/med/high', 'in':'query', 'type':'str', 'default':'all'},
         'from':{'description':'start timestamp', 'in':'query', 'type':'int', 'default':0},
         'to':{'description':f'end timestamp (default = {datetime.datetime.now(tz=datetime.timezone.utc)})', 'in':'query', 'type':'int', 'default':now_timestamp}
-    } ,responses={ 
+    }, responses={ 
         200: 'Operation done successfully',
         401: 'Database connection error',
         404: 'Error in connecting to economic calendar provider',
@@ -65,8 +66,49 @@ class calnedar(Resource):
             return ResponseAPI.send(status_code=401, message='database connection error.')
 
 
-        result = docs.search(source_name, currency_name, impact, from_timestamp, to_timestamp)
+        result = docs.search_by_info(source_name, currency_name, impact, from_timestamp, to_timestamp)
         # return json.loads(json.dumps(list(result)))
         return ResponseAPI.send(status_code=200, message='done successfully', data=list(result))
+
+
+@api.route('/testing')
+class testing(Resource):
+    @api.doc(params={
+        'year' : {'description':'specified year (example : 2022)', 'in':'query', 'type':'str', 'default':'any'},
+        'week' : {'description':'specified week (example : W06)', 'in':'query', 'type':'str', 'default':'any'}
+    }, responses={ 
+        200: 'Operation done successfully',
+        401: 'Database connection error',
+        404: 'Error in connecting to economic calendar provider',
+        422: 'Inconsistent paramters'
+    })
+    def get(self):
+        year = request.args.get('year')
+        week = request.args.get('week')
+
+        if year==None or week==None :
+            logger.error("year of week can't be None value.")
+            return ResponseAPI.send(status_code=422, message="year or week parameters can't be None value.")
+
+        if (year!='any') and ((len(year)!=4) or (year.isdigit()!=True)) :
+            logger.error('bad value for year parameter.')
+            return ResponseAPI.send(status_code=422, message="bad value for year parameter.")
+
+        if (week!='any') and ((len(week)!=3) or (week[1:].isdigit()!=True) or (week[0]!='W')) :
+            logger.error('bad value for week parameter.')
+            return ResponseAPI.send(status_code=422, message="bad value for week parameter.")
+
+        try :
+            docs = CalendarModel()
+        except :
+            logger.error("database connection error.")
+            return ResponseAPI.send(status_code=401, message='database connection error.')
+
+        result = docs.search_by_week_and_year(year, week)
+        if len(list(result)) != 0 :
+            result.rewind()
+            return ResponseAPI.send(status_code=200, message='done successfully', data=list(result))
+        else :
+            return ResponseAPI.send(status_code=200, message='no data by these parameters.')
 
 

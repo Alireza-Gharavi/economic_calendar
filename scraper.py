@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from V1.logger import logger
 import os, datetime
 
-os.environ['PATH'] += ':webdriver/'
+# os.environ['PATH'] += ':webdriver/'
 
 def Scraper(year, week):                # this function will scrape the data from www.babypips.com site given inputs year and week number and return the records of economic calendar as dictionaries in a list named info_list
     """ scrape the data of economic calendar at www.babypips.com
@@ -63,7 +63,7 @@ def Scraper(year, week):                # this function will scrape the data fro
         driver.get(url)
     except :
         logger.error(f"connection to the {url} can't be established.")
-    driver.maximize_window()
+    # driver.maximize_window()
     driver.implicitly_wait(10)
 
 
@@ -87,6 +87,8 @@ def Scraper(year, week):                # this function will scrape the data fro
             info['year'] = year
             info['week'] = f'W{week}'
             info['month_name'] = blocks[i].table.thead.tr.td.find('div', class_='Table-module__month___PGbXI').text
+            if info['week'] == 'W01' and info['month_name']=='Dec' :
+                continue
             info['month_num'] = months[info['month_name']]
             info['day_number'] = blocks[i].table.thead.tr.td.find('div', class_='Table-module__dayNumber___dyJpm').text
             info['week_day'] = blocks[i].table.tr.find('td', class_='Table-module__weekday___p3Buh').text

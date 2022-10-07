@@ -5,6 +5,8 @@ import os
 
 app = Flask('__name__')
 
+os.environ['PATH'] += ':webdriver/'
+
 
 os.system("python db_manager.py&")
 
