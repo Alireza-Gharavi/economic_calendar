@@ -1,6 +1,12 @@
 instance/
 .webassets-cache
 
+# Specific files
+test.py
+query_result.json
+recs.json
+selenium_tests.py
+
 # Scrapy stuff:
 .scrapy
 
@@ -17,6 +23,7 @@ target/
 # IPython
 profile_default/
 ipython_config.py
+
 # Environments
 .env
 .venv
@@ -27,3 +34,6 @@ env.bak/
 venv.bak/
 
 __pycache__/
+
+# Logging 
+*.log
