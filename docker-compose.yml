@@ -1,0 +1,26 @@
+version: '3'
+services:
+  mongodb:
+    container_name: EcoCalendar_db
+    image: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=pass
+    ports:
+      - 27017:27017
+
+  app:
+    container_name: EcoCalendar
+    build: .
+    links:
+      - mongodb
+    depends_on:
+      - mongodb
+    ports: 
+      - 5000:5000
+    volumes:
+      - /dev/shm:/dev/shm
+
+volumes:
+  mongo-data:
+    driver: local

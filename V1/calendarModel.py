@@ -1,8 +1,6 @@
-from flask import current_app
 from V1.response import ResponseAPI
 from pymongo import MongoClient
 from V1.logger import logger
-import logging
 import re
 
 p = re.compile('.*')
@@ -11,8 +9,10 @@ p = re.compile('.*')
 
 class CalendarModel:
 
-    def __init__(self):
-        connection_string = 'mongodb://localhost:27017/'
+    def __init__(self, log=True):
+        # connection_string = 'mongodb://admin:pass@localhost:27017/'
+        connection_string = 'mongodb://admin:pass@EcoCalendar_db:27017/'
+        # connection_string = 'mongodb://localhost:27017/'
         self.client = MongoClient(connection_string)
         self.database = self.client.economic_calendar
         self.collection = self.database.records
@@ -21,6 +21,8 @@ class CalendarModel:
         try :
             self.database.list_collection_names()
             self.connection_flag = True
+            if log :
+                logger.info("database connection established successfully.")
         except :
             logger.critical("database connection error.")
             self.connection_flag = False

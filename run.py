@@ -1,11 +1,15 @@
 from flask import Flask
+from V1.logger import logger
 from V1 import blueprint as api
 from flask_cors import CORS
 import os
 
+
+logger.info("app is starting...")
+
 app = Flask('__name__')
 
-os.environ['PATH'] += ':webdriver/'
+# os.environ['PATH'] += ':webdriver/'
 
 
 os.system("python db_manager.py&")

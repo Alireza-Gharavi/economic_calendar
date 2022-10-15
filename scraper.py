@@ -2,9 +2,10 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from bs4 import BeautifulSoup
 from V1.logger import logger
-import os, datetime
+import datetime
 
 # os.environ['PATH'] += ':webdriver/'
 
@@ -27,6 +28,8 @@ def Scraper(year, week):                # this function will scrape the data fro
     """
     year = str(year)
     week = f"{int(week):02}"
+
+    attempt_counter = 0
 
     months = {
         'Jan' : '01',
@@ -60,17 +63,40 @@ def Scraper(year, week):                # this function will scrape the data fro
     driver = initializer()
 
     try :
+        attempt_counter += 1
         driver.get(url)
     except :
         logger.error(f"connection to the {url} can't be established.")
-    # driver.maximize_window()
-    driver.implicitly_wait(10)
+        if attempt_counter <= 3 :
+            logger.info(f'connecting to the {url}, attempt : {attempt_counter}')
+            Scraper(year, week)
+        else :
+            return -1
 
+    
+    try:
+        driver.maximize_window()
+        driver.implicitly_wait(50)
+    except Exception as e :
+        logger.error("unknow error occured :",e)
 
-    try :
-        interact_with_site(driver)
-    except Exception as e:
-        logger.error(f'selenium unable to intract with {url}.')
+    if len(driver.page_source) > 200 :
+        try :
+            interact_with_site(driver)
+        except Exception as e:
+            logger.error(f'selenium unable to intract with {url}. {e}')
+            if attempt_counter <= 3 :
+                logger.info(f'rerequesting to the {url}, attempt : {attempt_counter}')
+                Scraper(year, week)
+            else :
+                return -1
+    else :
+        logger.error(f"source of the requested page does not scraped properly.")
+        if attempt_counter <= 3 :
+                logger.info(f'rerequesting to the {url}, attempt : {attempt_counter}')
+                Scraper(year, week)
+        else :
+            return -1
 
     res = driver.page_source
     soup = BeautifulSoup(res, 'lxml')
@@ -125,24 +151,43 @@ def timestamp_calc(info):
 
 def interact_with_site(driver):
     """this function uses selenium to interact with site in order to provide the desired source code to extract and scraping."""
+    try :
+        week_button = driver.find_element(By.XPATH,'/html/body/div[2]/div[2]/section[2]/div/div/div[1]/div/div[2]/div[2]/button[1]')
+        week_button.click()
 
-    week_button = driver.find_element(By.XPATH,'/html/body/div[2]/div[2]/section[2]/div/div/div[1]/div/div[2]/div[2]/button[1]')
-    week_button.click()
+        timestamp_key = driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/section[2]/div/div/div[1]/div/div[2]/div[1]/button')
+        timestamp_key.click()
 
-    timestamp_key = driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/section[2]/div/div/div[1]/div/div[2]/div[1]/button')
-    timestamp_key.click()
+        list_box = driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/section[2]/div/div/div[1]/div/div[2]/div[1]/ol')
+        select_timestamp = list_box.find_element(By.XPATH, '/html/body/div[2]/div[2]/section[2]/div/div/div[1]/div/div[2]/div[1]/ol/li[13]')
+        select_timestamp.find_element(By.XPATH, '/html/body/div[2]/div[2]/section[2]/div/div/div[1]/div/div[2]/div[1]/ol/li[13]/div').click()
+    except:
+        try:
+            week_button = driver.find_element(By.XPATH,'/html/body/div[1]/div[2]/section[2]/div/div/div[1]/div/div[2]/div[2]/button[1]')
+            week_button.click()
 
-    list_box = driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/section[2]/div/div/div[1]/div/div[2]/div[1]/ol')
-    select_timestamp = list_box.find_element(By.XPATH, '/html/body/div[2]/div[2]/section[2]/div/div/div[1]/div/div[2]/div[1]/ol/li[13]')
-    select_timestamp.find_element(By.XPATH, '/html/body/div[2]/div[2]/section[2]/div/div/div[1]/div/div[2]/div[1]/ol/li[13]/div').click()
+            timestamp_key = driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/section[2]/div/div/div[1]/div/div[2]/div[1]/button')
+            timestamp_key.click()
+
+            list_box = driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/section[2]/div/div/div[1]/div/div[2]/div[1]/ol')
+            select_timestamp = list_box.find_element(By.XPATH, '/html/body/div[1]/div[2]/section[2]/div/div/div[1]/div/div[2]/div[1]/ol/li[13]')
+            select_timestamp.find_element(By.XPATH, '/html/body/div[1]/div[2]/section[2]/div/div/div[1]/div/div[2]/div[1]/ol/li[13]/div').click()
+        except Exception as e :
+            raise e
+
 
 
 def initializer():
     """intialize webdriver for selenium client."""
     options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--window-size=1920x1080")
+    options.add_argument('--no-sandbox')
+    options.add_argument('--window-size=1920,1080')
+    options.add_argument('--headless')
+    options.add_argument('--disable-dev-shm-usage')  
+    # options.add_argument('--disable-gpu')
     driver = webdriver.Chrome(options=options)
+    # driver = webdriver.Remote('http://0.0.0.0:4444/wd/hub', options=options)
+    # driver = webdriver.Remote('http://0.0.0.0:4444/wd/hub', DesiredCapabilities.CHROME)
     return driver
 
 if __name__=='__main__' :

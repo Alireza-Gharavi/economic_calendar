@@ -2,7 +2,7 @@ import datetime
 import re
 from V1.response import ResponseAPI
 from V1.calendarModel import CalendarModel
-from flask import request, current_app
+from flask import request
 from flask_restx import Resource, Namespace
 from V1.logger import logger
 
@@ -60,7 +60,7 @@ class calnedar(Resource):
             return ResponseAPI.send(status_code=422, message='value of start parameter(from) is greater than end parameter(to)', data={'present timestamp':int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp())})
         
         try :
-            docs = CalendarModel()
+            docs = CalendarModel(log=False)
         except :
             logger.error("database connection error.")
             return ResponseAPI.send(status_code=401, message='database connection error.')
@@ -99,7 +99,7 @@ class testing(Resource):
             return ResponseAPI.send(status_code=422, message="bad value for week parameter.")
 
         try :
-            docs = CalendarModel()
+            docs = CalendarModel(log=False)
         except :
             logger.error("database connection error.")
             return ResponseAPI.send(status_code=401, message='database connection error.')
