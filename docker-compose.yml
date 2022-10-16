@@ -21,6 +21,6 @@ services:
     volumes:
       - /dev/shm:/dev/shm
 
-volumes:
-  mongo-data:
-    driver: local
+# volumes:
+#   mongo-data:
+#     driver: local

@@ -9,6 +9,8 @@ import datetime
 
 # os.environ['PATH'] += ':webdriver/'
 
+attempt_counter = 0
+
 def Scraper(year, week):                # this function will scrape the data from www.babypips.com site given inputs year and week number and return the records of economic calendar as dictionaries in a list named info_list
     """ scrape the data of economic calendar at www.babypips.com
 
@@ -29,7 +31,8 @@ def Scraper(year, week):                # this function will scrape the data fro
     year = str(year)
     week = f"{int(week):02}"
 
-    attempt_counter = 0
+    global attempt_counter 
+    
 
     months = {
         'Jan' : '01',
@@ -71,6 +74,7 @@ def Scraper(year, week):                # this function will scrape the data fro
             logger.info(f'connecting to the {url}, attempt : {attempt_counter}')
             Scraper(year, week)
         else :
+            attempt_counter = 0
             return -1
 
     
@@ -89,6 +93,7 @@ def Scraper(year, week):                # this function will scrape the data fro
                 logger.info(f'rerequesting to the {url}, attempt : {attempt_counter}')
                 Scraper(year, week)
             else :
+                attempt_counter = 0
                 return -1
     else :
         logger.error(f"source of the requested page does not scraped properly.")
@@ -96,6 +101,7 @@ def Scraper(year, week):                # this function will scrape the data fro
                 logger.info(f'rerequesting to the {url}, attempt : {attempt_counter}')
                 Scraper(year, week)
         else :
+            attempt_counter = 0
             return -1
 
     res = driver.page_source
@@ -133,7 +139,7 @@ def Scraper(year, week):                # this function will scrape the data fro
                 info['timestamp'] = timestamp_calc(info)
 
                 info_list.append(info.copy())
-            
+        attempt_counter = 0
         return info_list
     except :
         logger.error(f'an error occured during parsing the extracted data from {url} by BeatifulSoup.')
@@ -186,8 +192,7 @@ def initializer():
     options.add_argument('--disable-dev-shm-usage')  
     # options.add_argument('--disable-gpu')
     driver = webdriver.Chrome(options=options)
-    # driver = webdriver.Remote('http://0.0.0.0:4444/wd/hub', options=options)
-    # driver = webdriver.Remote('http://0.0.0.0:4444/wd/hub', DesiredCapabilities.CHROME)
+
     return driver
 
 if __name__=='__main__' :
