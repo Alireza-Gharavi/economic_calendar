@@ -115,7 +115,7 @@ def main():
         exit()
     while True:
         scrape_and_save()
-        time.sleep(18000)           # 18000 secoonds = five hours 
+        time.sleep(3600)           # 3600 secoonds = five hours 
 
 
 if __name__ == '__main__' :

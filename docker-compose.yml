@@ -3,6 +3,8 @@ services:
   mongodb:
     container_name: EcoCalendar_db
     image: mongo
+    volumes :
+      - mongo-data:/data/db
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=pass
@@ -20,7 +22,8 @@ services:
       - 5000:5000
     volumes:
       - /dev/shm:/dev/shm
+      - calendar-logs:/economic_calendar/logs
 
-# volumes:
-#   mongo-data:
-#     driver: local
+volumes:
+  mongo-data:
+  calendar-logs:

@@ -191,8 +191,11 @@ def initializer():
     options.add_argument('--headless')
     options.add_argument('--disable-dev-shm-usage')  
     # options.add_argument('--disable-gpu')
-    driver = webdriver.Chrome(options=options)
-
+    try :
+        driver = webdriver.Chrome(options=options)
+    except Exception as e:
+        logger.error("webdriver can't be loaded.")
+        logger.error("exception : ",e)
     return driver
 
 if __name__=='__main__' :
